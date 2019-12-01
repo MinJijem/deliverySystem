@@ -52,13 +52,39 @@ static void printStorageInside(int x, int y) {
 //int x, int y : cell coordinate to be initialized
 static void initStorage(int x, int y) {
 	
+
+	printf("------------------------>extracting the storage(%d, %d)\n",x,y);
+	printStorageInside(x,y);
+	deliverySystem[x][y].cnt=0;	
+
+	
 }
 
 //get password input and check if it is correct for the cell (x,y)
 //int x, int y : cell for password check
 //return : 0 - password is matching, -1 - password is not matching
-static int inputPasswd(int x, int y) {
+static int inputPasswd(int x, int y)
+{
 	
+		char getpass[PASSWD_LEN+1];
+		int result;
+	
+		printf(" - input password for (%d, %d) storage",x,y);
+		scanf("%s",getpass);
+		
+		result=strcmp(getpass,deliverySystem[x][y].passwd);
+		
+		if(result!=0)
+		{
+			printf("-------------------------> password is wrong !!\n");
+			return -1;
+		}
+		else
+		{
+			initStorage(x,y);
+			return 0;
+		}
+
 }
 
 
@@ -150,9 +176,11 @@ int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_S
 {
 	FILE *fp;
 	
-	fp=fopen("storage.txt","a");
+	fp=fopen("storage.txt","w");
 	
-	fprintf(fp,"%d %d %d %d %s %s",x,y,nBuilding,msg,passwd,nRoom);
+	fprintf(fp,"%d %d %d %d %s %s",x,y,nBuilding,nRoom,passwd,msg);
+	
+
 	
 	return fclose(fp);
 	
@@ -171,6 +199,20 @@ int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_S
 //return : 0 - successfully extracted, -1 = failed to extract
 int str_extractStorage(int x, int y) {
 	
+	int result;
+	
+	result=inputPasswd(x,y);
+	
+	if(result!=0)
+	{
+		return -1;
+	}
+	else
+	{
+		initStorage(x,y);
+		return 0;
+	}
+	
 }
 
 //find my package from the storage
@@ -178,6 +220,26 @@ int str_extractStorage(int x, int y) {
 //int nBuilding, int nRoom : my building/room numbers
 //return : number of packages that the storage system has
 int str_findStorage(int nBuilding, int nRoom) {
+	
+	int i,j;
+	int cnt=0;
+	
+	for(i=0;i<3;i++)
+	{
+		for(j=0;j<5;i++)
+		{
+			if(deliverySystem[i][j].building==nBuilding && deliverySystem[i][j].room==nRoom)
+			cnt=1;
+			break;
+		}
+		
+		if(deliverySystem[i][j].building==nBuilding && deliverySystem[i][j].room==nRoom)
+			break;
+		
+	}
+
+
+	printf("-------------->Found a package in (%d, %d)",i,j);
 	
 	return cnt;
 }
