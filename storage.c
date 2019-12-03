@@ -99,6 +99,22 @@ static int inputPasswd(int x, int y)
 //return : 0 - backup was successfully done, -1 - failed to backup
 int str_backupSystem(char* filepath) {
 	
+	FILE *fp;
+	
+	fp=fopen(filepath,"w");
+	
+	/*for(i=0;i<4;i++)
+	{
+		for(j=0;j<6;j++)
+		{
+			if(deliverySystem[i][j].cnt!=0)
+			{
+				fprintf
+			}	
+		}
+	}*/
+
+	return fclose(fp);
 
 	
 }
@@ -110,10 +126,31 @@ int str_backupSystem(char* filepath) {
 //return : 0 - successfully created, -1 - failed to create the system
 int str_createSystem(char* filepath) {
 	
-	int i,j;
-		
-	deliverySystem=(struct storage_t**)malloc(sizeof(struct storage_t*));
+	int x,y;
 	
+	FILE *fp;
+	
+	fp=fopen(filepath,"r");
+	
+	/*while()
+	fscanf(fp,"%d ",&x);
+	fscanf(fp,"%d ",&y);
+	fscanf(fp,"%d ",&deliverySystem[x][y].building);
+	fscanf(fp,"%d ",&deliverySystem[x][y].room);
+	fscanf(fp,"%s ",&deliverySystem[x][y].passwd);
+	fscanf(fp,"%s \n",&deliverySystem[x][y].context);*/
+	
+	
+	return fclose(fp);
+	/*int i,j;	
+	deliverySystem=(struct storage_t**)malloc(sizeof(struct storage_t*));
+	for(i=0;i<4;i++)
+	{
+		for(j=0;j<6;j++)
+		{
+		deliverySystem[i][j]=(struct storage_t*)malloc(systemSize[0]*systemSize[1]*sizeof(struct storage_t));	
+		}
+	}*/
 
 	
 			
