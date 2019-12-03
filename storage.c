@@ -13,6 +13,7 @@
   char *contents : package context (message string)
 */
 typedef struct {
+	
 	int building;
 	int room;
 	int cnt;
@@ -24,7 +25,7 @@ typedef struct {
 
 static storage_t** deliverySystem; 			//deliverySystem
 static int storedCnt = 0;					//number of cells occupied
-static int systemSize[2] = {0, 0};  		//row/column of the delivery system
+static int systemSize[2] = {4, 6};  		//row/column of the delivery system
 static char masterPassword[PASSWD_LEN+1];	//master password
 
 
@@ -98,6 +99,8 @@ static int inputPasswd(int x, int y)
 //return : 0 - backup was successfully done, -1 - failed to backup
 int str_backupSystem(char* filepath) {
 	
+
+	
 }
 
 
@@ -107,10 +110,22 @@ int str_backupSystem(char* filepath) {
 //return : 0 - successfully created, -1 - failed to create the system
 int str_createSystem(char* filepath) {
 	
+	int i,j;
+		
+	deliverySystem=(struct storage_t**)malloc(sizeof(struct storage_t*));
+	
+
+	
+			
+
+
+	return 0;
+
 }
 
 //free the memory of the deliverySystem 
 void str_freeSystem(void) {
+	
 	
 }
 
@@ -174,16 +189,13 @@ int str_checkStorage(int x, int y) {
 //return : 0 - successfully put the package, -1 - failed to put
 int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_SIZE+1], char passwd[PASSWD_LEN+1])
 {
-	FILE *fp;
 	
-	fp=fopen("storage.txt","w");
-	
-	fprintf(fp,"%d %d %d %d %s %s",x,y,nBuilding,nRoom,passwd,msg);
-	
+	deliverySystem[x][y].building=nBuilding;
+	//deliverySystem[x][y].passwd=passwd;
+	deliverySystem[x][y].room=nRoom;
+	deliverySystem[x][y].context=msg;
 
-	
-	return fclose(fp);
-	
+
 	
 	//특정 보관함에 택배 넣기
 	//파일열기, 세로 x번째줄 가로 y번째 줄에
