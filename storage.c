@@ -25,7 +25,7 @@ typedef struct {
 
 static storage_t** deliverySystem; 			//deliverySystem
 static int storedCnt = 0;					//number of cells occupied
-static int systemSize[2] = {4, 6};  		//row/column of the delivery system
+static int systemSize[2] = {0, 0};  		//row/column of the delivery system
 static char masterPassword[PASSWD_LEN+1];	//master password
 
 
@@ -99,24 +99,32 @@ static int inputPasswd(int x, int y)
 //return : 0 - backup was successfully done, -1 - failed to backup
 int str_backupSystem(char* filepath) {
 	
+	int i,j;
+	
 	FILE *fp;
 	
 	fp=fopen(filepath,"w");
 	
-	/*for(i=0;i<4;i++)
+	fprintf(fp,"%d %d\n",systemSize[0],systemSize[1]);
+	fprintf(fp,"%s\n",masterPassword);
+	
+	for(i=0;i<systemSize[0];i++)
 	{
-		for(j=0;j<6;j++)
+		for(j=0;j<systemSize[1];j++)
 		{
 			if(deliverySystem[i][j].cnt!=0)
-			{
-				fprintf
-			}	
+			fprintf(fp,"%d %d %d %d %s %s\n",i,j,deliverySystem[i][j].building,deliverySystem[i][j].room,deliverySystem[i][j].passwd,deliverySystem[i][j].context);
 		}
-	}*/
-
-	return fclose(fp);
-
+	}
 	
+	if(fclose(fp)==0)
+	{
+		return 0;
+	}
+	else
+	{
+		return -1;
+	}
 }
 
 
@@ -126,12 +134,18 @@ int str_backupSystem(char* filepath) {
 //return : 0 - successfully created, -1 - failed to create the system
 int str_createSystem(char* filepath) {
 	
+	
 	int x,y;
+	char *save_maspaswd;
+	
+	 
 	
 	FILE *fp;
 	
 	fp=fopen(filepath,"r");
-	
+	//정보를 가져와서 저장함
+
+	 
 	/*while()
 	fscanf(fp,"%d ",&x);
 	fscanf(fp,"%d ",&y);
@@ -141,14 +155,21 @@ int str_createSystem(char* filepath) {
 	fscanf(fp,"%s \n",&deliverySystem[x][y].context);*/
 	
 	
-	return fclose(fp);
+	if(fclose(fp)==0)
+	{
+		return 0;
+	}
+	else
+	{
+		return -1;
+	}
 	/*int i,j;	
 	deliverySystem=(struct storage_t**)malloc(sizeof(struct storage_t*));
 	for(i=0;i<4;i++)
 	{
 		for(j=0;j<6;j++)
 		{
-		deliverySystem[i][j]=(struct storage_t*)malloc(systemSize[0]*systemSize[1]*sizeof(struct storage_t));	
+		deliverySystem[i][j]=(struct storage_t*)malloc(systemSize[0]*systemSize[1]);	
 		}
 	}*/
 
