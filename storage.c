@@ -54,9 +54,9 @@ static void printStorageInside(int x, int y) {
 static void initStorage(int x, int y) {
 	
 
-	printf("------------------------>extracting the storage(%d, %d)\n",x,y);
-	printStorageInside(x,y);
-	deliverySystem[x][y].cnt=0;	
+	printf("------------------------>extracting the storage(%d, %d)...\n",x,y);
+	printStorageInside(x,y); 
+	deliverySystem[x][y].cnt=0;	//save the number of object is 0 in storage (x,y) 
 
 	
 }
@@ -67,22 +67,22 @@ static void initStorage(int x, int y) {
 static int inputPasswd(int x, int y)
 {
 	
-		char getpass[PASSWD_LEN+1];
+		char getpass[PASSWD_LEN+1];				
 		int result;
 	
 		printf(" - input password for (%d, %d) storage",x,y);
-		scanf("%s",getpass);
+		scanf("%s",getpass);					//get password
 		
-		result=strcmp(getpass,deliverySystem[x][y].passwd);
+		result=strcmp(getpass,deliverySystem[x][y].passwd);		//compare password
 		
-		if(result!=0)
+		if(result!=0)					//getpassword =/= storage's password
 		{
 			printf("-------------------------> password is wrong !!\n");
 			return -1;
 		}
-		else
+		else 							//getpassword = storage's password
 		{
-			initStorage(x,y);
+			initStorage(x,y);			//reset storage cell
 			return 0;
 		}
 
@@ -103,20 +103,23 @@ int str_backupSystem(char* filepath) {
 	
 	FILE *fp;
 	
-	fp=fopen(filepath,"w");
+	fp=fopen(filepath,"w");								//file open writing mode 
 	
-	fprintf(fp,"%d %d\n",systemSize[0],systemSize[1]);
+	fprintf(fp,"%d %d\n",systemSize[0],systemSize[1]);	//save systemsize and masterpassword
 	fprintf(fp,"%s\n",masterPassword);
 	
 	for(i=0;i<systemSize[0];i++)
 	{
 		for(j=0;j<systemSize[1];j++)
 		{
-			if(deliverySystem[i][j].cnt!=0)
+			//if there is object in storage cell
+			if(deliverySystem[i][j].cnt!=0)			
+			//save informations
 			fprintf(fp,"%d %d %d %d %s %s\n",i,j,deliverySystem[i][j].building,deliverySystem[i][j].room,deliverySystem[i][j].passwd,deliverySystem[i][j].context);
 		}
 	}
 	
+	//close file
 	if(fclose(fp)==0)
 	{
 		return 0;
@@ -134,7 +137,7 @@ int str_backupSystem(char* filepath) {
 //return : 0 - successfully created, -1 - failed to create the system
 int str_createSystem(char* filepath) {
 	
-	
+	int i;
 	int x,y;
 	int c; 
 	int nBuilding;
@@ -143,26 +146,28 @@ int str_createSystem(char* filepath) {
 	
 	FILE *fp;
 	
-	fp=fopen(filepath,"r");
+	fp=fopen(filepath,"r");//open file
 	//정보를 가져와서 먼저 저장한 후에 메모리 할당  
 
 	fscanf(fp,"%d %d\n",&systemSize[0],&systemSize[1]);
 	fscanf(fp,"%s\n",masterPassword);
-	 
+	
+	/*deliverySystem=(struct storage_t**)malloc(systemSize[0]*sizeof(struct storage_t*));*/
+	
+
+
+
+	
 	while(c=fgetc(fp)!=EOF)//공백이 나올떄까지 
 	 {
 	 	fscanf(fp,"%d %d ",&x,&y);
-	 	//fscanf(fp,"%d ",&nBuilding);
-	 	//fscanf(fp)
+	 	fscanf(fp,"%d ",&deliverySystem[x][y].building);
+	 	fscanf(fp,"%d ",&deliverySystem[x][y].room);
+	 	fscanf(fp,"%s ",deliverySystem[x][y].passwd);
+	 	fscanf(fp,"%s ",deliverySystem[x][y].context);
+	 	
 	 }
 	 
-	/*while()
-	fscanf(fp,"%d ",&x);
-	fscanf(fp,"%d ",&y);
-	fscanf(fp,"%d ",&deliverySystem[x][y].building);
-	fscanf(fp,"%d ",&deliverySystem[x][y].room);
-	fscanf(fp,"%s ",&deliverySystem[x][y].passwd);
-	fscanf(fp,"%s \n",&deliverySystem[x][y].context);*/
 	
 	
 	if(fclose(fp)==0)
@@ -260,16 +265,9 @@ int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_S
 {
 	
 	deliverySystem[x][y].building=nBuilding;
-	//deliverySystem[x][y].passwd=passwd;
+	strcpy(deliverySystem[x][y].passwd,passwd);
 	deliverySystem[x][y].room=nRoom;
-	deliverySystem[x][y].context=msg;
-
-
-	
-	//특정 보관함에 택배 넣기
-	//파일열기, 세로 x번째줄 가로 y번째 줄에
-	//빌딩,호 표시-> nBuilding,nRoom으로 표시 
-	//메세지,비번  같이 저장 
+	strcpy(deliverySystem[x][y].context,msg);
 }
 
 
