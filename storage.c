@@ -136,15 +136,25 @@ int str_createSystem(char* filepath) {
 	
 	
 	int x,y;
-	char *save_maspaswd;
+	int c; 
+	int nBuilding;
 	
 	 
 	
 	FILE *fp;
 	
 	fp=fopen(filepath,"r");
-	//정보를 가져와서 저장함
+	//정보를 가져와서 먼저 저장한 후에 메모리 할당  
 
+	fscanf(fp,"%d %d\n",&systemSize[0],&systemSize[1]);
+	fscanf(fp,"%s\n",masterPassword);
+	 
+	while(c=fgetc(fp)!=EOF)//공백이 나올떄까지 
+	 {
+	 	fscanf(fp,"%d %d ",&x,&y);
+	 	//fscanf(fp,"%d ",&nBuilding);
+	 	//fscanf(fp)
+	 }
 	 
 	/*while()
 	fscanf(fp,"%d ",&x);
@@ -162,6 +172,7 @@ int str_createSystem(char* filepath) {
 	else
 	{
 		return -1;
+	
 	}
 	/*int i,j;	
 	deliverySystem=(struct storage_t**)malloc(sizeof(struct storage_t*));
