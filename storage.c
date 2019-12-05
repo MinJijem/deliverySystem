@@ -55,8 +55,9 @@ static void initStorage(int x, int y) {
 	
 
 	printf("------------------------>extracting the storage(%d, %d)...\n",x,y);
-	printStorageInside(x,y); 
-	deliverySystem[x][y].cnt=0;	//save the number of object is 0 in storage (x,y) 
+	printStorageInside(x,y);
+	deliverySystem[x][y].cnt=0;		//save the number of object is 0 in storage (x,y) 
+	storedCnt--;					//the number of object in storage --1
 
 	
 }
@@ -69,21 +70,22 @@ static int inputPasswd(int x, int y)
 	
 		char getpass[PASSWD_LEN+1];				
 		int result;
+		int result2; 
 	
-		printf(" - input password for (%d, %d) storage",x,y);
-		scanf("%s",getpass);					//get password
+		printf(" - input password for (%d, %d) storage : ",x,y);
+		scanf("%s",getpass);									//get password
 		
-		result=strcmp(getpass,deliverySystem[x][y].passwd);		//compare password
+		result=strcmp(getpass,deliverySystem[x][y].passwd);		//compare getpass with password
+		result2=strcmp(getpass,masterPassword);					//compare getpass with master password
 		
-		if(result!=0)					//getpassword =/= storage's password
+		if(result==0 || result2==0) 							//getpassword = storage's password or getpass = master password
+		{
+			return 0;
+		}
+		else					//getpassword =/= storage's password or master password
 		{
 			printf("-------------------------> password is wrong !!\n");
 			return -1;
-		}
-		else 							//getpassword = storage's password
-		{
-			initStorage(x,y);			//reset storage cell
-			return 0;
 		}
 
 }
@@ -103,7 +105,8 @@ int str_backupSystem(char* filepath) {
 	
 	FILE *fp;
 	
-	fp=fopen(filepath,"w");								//file open writing mode 
+	if((fp=fopen(filepath,"w"))==NULL)						//file open writing mode 
+		return -1;					
 	
 	fprintf(fp,"%d %d\n",systemSize[0],systemSize[1]);	//save systemsize and masterpassword
 	fprintf(fp,"%s\n",masterPassword);
@@ -113,9 +116,11 @@ int str_backupSystem(char* filepath) {
 		for(j=0;j<systemSize[1];j++)
 		{
 			//if there is object in storage cell
-			if(deliverySystem[i][j].cnt!=0)			
+			if(deliverySystem[i][j].cnt!=0)
+			{				
 			//save informations
 			fprintf(fp,"%d %d %d %d %s %s\n",i,j,deliverySystem[i][j].building,deliverySystem[i][j].room,deliverySystem[i][j].passwd,deliverySystem[i][j].context);
+			}
 		}
 	}
 	
@@ -137,36 +142,69 @@ int str_backupSystem(char* filepath) {
 //return : 0 - successfully created, -1 - failed to create the system
 int str_createSystem(char* filepath) {
 	
-	int i;
+	int i,j;
 	int x,y;
-	int c; 
-	int nBuilding;
+	char c;
 	
-	 
 	
 	FILE *fp;
 	
-	fp=fopen(filepath,"r");//open file
-	//정보를 가져와서 먼저 저장한 후에 메모리 할당  
-
-	fscanf(fp,"%d %d\n",&systemSize[0],&systemSize[1]);
-	fscanf(fp,"%s\n",masterPassword);
-	
-	/*deliverySystem=(struct storage_t**)malloc(systemSize[0]*sizeof(struct storage_t*));*/
+	if((fp=fopen(filepath,"r"))==NULL)					//open file
+		return -1;
 	
 
+	fscanf(fp,"%d %d",&systemSize[0],&systemSize[1]);	//get systemsize and master password
+	fscanf(fp,"%s",masterPassword);
+	
+	
+	deliverySystem=malloc(systemSize[0]*sizeof(struct storage_t*)); //memory allocation
+	for(i=0;i<systemSize[0];i++)
+		deliverySystem[i]=malloc(systemSize[1]*sizeof(storage_t));
+		
+	for(i=0;i<systemSize[0];i++)									//memory allocation deliverySystem.context
+	{
+		for(j=0;j<systemSize[1];j++)
+			deliverySystem[i][j].context=(char *)malloc(100*sizeof(char));
+	}
+
+		
+	if(deliverySystem==NULL)				//if fail to allocate
+	{
+		return-1;
+	}
+
+	
+
+	for(i=0;i<systemSize[0];i++)			//before get deliverySystem information, initialization
+	{
+		for(j=0;j<systemSize[1];j++)
+		{
+			deliverySystem[i][j].cnt=0;	
+		}
+	}
 
 
 	
-	while(c=fgetc(fp)!=EOF)//공백이 나올떄까지 
-	 {
+	while(c=fgetc(fp)!=EOF)					//to the end of the file
+	 {	
+	 	
 	 	fscanf(fp,"%d %d ",&x,&y);
-	 	fscanf(fp,"%d ",&deliverySystem[x][y].building);
-	 	fscanf(fp,"%d ",&deliverySystem[x][y].room);
-	 	fscanf(fp,"%s ",deliverySystem[x][y].passwd);
-	 	fscanf(fp,"%s ",deliverySystem[x][y].context);
+	 	deliverySystem[x][y].cnt=1;
+	 	fscanf(fp," %d",&deliverySystem[x][y].building);
+	 	fscanf(fp," %d",&deliverySystem[x][y].room);
+	 	fscanf(fp," %s",deliverySystem[x][y].passwd);
+	 	fscanf(fp," %s",deliverySystem[x][y].context);
 	 	
 	 }
+	 
+	for(i=0;i<systemSize[0];i++)				//count the number of object in storage
+	{
+		for(j=0;j<systemSize[1];j++)
+		{
+			if(deliverySystem[i][j].cnt!=0)
+			storedCnt++;
+		}
+	}
 	 
 	
 	
@@ -179,27 +217,18 @@ int str_createSystem(char* filepath) {
 		return -1;
 	
 	}
-	/*int i,j;	
-	deliverySystem=(struct storage_t**)malloc(sizeof(struct storage_t*));
-	for(i=0;i<4;i++)
-	{
-		for(j=0;j<6;j++)
-		{
-		deliverySystem[i][j]=(struct storage_t*)malloc(systemSize[0]*systemSize[1]);	
-		}
-	}*/
 
-	
-			
-
-
-	return 0;
 
 }
 
 //free the memory of the deliverySystem 
 void str_freeSystem(void) {
 	
+	int i;
+	
+	for(i=0;i<systemSize[0];i++)					//free
+		free(deliverySystem[i]);
+	free(deliverySystem);
 	
 }
 
@@ -207,6 +236,7 @@ void str_freeSystem(void) {
 
 //print the current state of the whole delivery system (which cells are occupied and the destination of the each occupied cells)
 void str_printStorageStatus(void) {
+	
 	int i, j;
 	printf("----------------------------- Delivery Storage System Status (%i occupied out of %i )-----------------------------\n\n", storedCnt, systemSize[0]*systemSize[1]);
 	
@@ -264,10 +294,14 @@ int str_checkStorage(int x, int y) {
 int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_SIZE+1], char passwd[PASSWD_LEN+1])
 {
 	
+	deliverySystem[x][y].cnt++;
 	deliverySystem[x][y].building=nBuilding;
 	strcpy(deliverySystem[x][y].passwd,passwd);
 	deliverySystem[x][y].room=nRoom;
 	strcpy(deliverySystem[x][y].context,msg);
+	storedCnt++;
+	
+	return 0;
 }
 
 
@@ -280,7 +314,7 @@ int str_extractStorage(int x, int y) {
 	
 	int result;
 	
-	result=inputPasswd(x,y);
+	result=inputPasswd(x,y);			//password check
 	
 	if(result!=0)
 	{
@@ -303,22 +337,19 @@ int str_findStorage(int nBuilding, int nRoom) {
 	int i,j;
 	int cnt=0;
 	
-	for(i=0;i<3;i++)
+	for(i=0;i<systemSize[0];i++)
 	{
-		for(j=0;j<5;i++)
+		for(j=0;j<systemSize[1];j++)
 		{
-			if(deliverySystem[i][j].building==nBuilding && deliverySystem[i][j].room==nRoom)
-			cnt=1;
-			break;
+			if(deliverySystem[i][j].building==nBuilding && deliverySystem[i][j].room==nRoom)	//if find storage cell, print information and finish
+			{
+			printf("-------------->Found a package in (%d, %d)",i,j);
+			return 1;
+			}
+		
 		}
 		
-		if(deliverySystem[i][j].building==nBuilding && deliverySystem[i][j].room==nRoom)
-			break;
-		
 	}
-
-
-	printf("-------------->Found a package in (%d, %d)",i,j);
 	
 	return cnt;
 }
